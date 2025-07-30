@@ -7,6 +7,9 @@
   "repository": "https://github.com/SvS30/sweet-hope",
   "version": "0.0.0",
   "type": "module",
+  "engines": {
+    "node": "18"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",

@@ -1,7 +1,9 @@
-import { useState } from "react";
-import type { PregnancyData } from "../types/pregnancyData";
+import { useEffect, useState } from "react";
 import { Brain, ChevronLeft, ChevronRight, Eye, Zap } from "lucide-react";
+
+import type { PregnancyData } from "../types/pregnancyData";
 import { weeklyDevelopment } from "../constants/babyData";
+import { useAIContent } from "../hooks";
 
 interface Props {
     pregnancyData: PregnancyData
@@ -10,6 +12,32 @@ interface Props {
 const WeeklyProgress: React.FC<Props> = ({ pregnancyData }) => {
 
     const [selectedWeek, setSelectedWeek] = useState<number>(pregnancyData.currentWeek);
+    const { generateContent, isLoading: isLoadingAI } = useAIContent();
+    const [aiDevelopmentInfo, setAiDevelopmentInfo] = useState<string>('');
+
+    useEffect(() => {
+        const loadAIDevelopmentInfo = async () => {
+            // Solo cargar contenido AI para la semana actual
+            if (selectedWeek === pregnancyData.currentWeek) {
+                try {
+                    const response = await generateContent({
+                        type: 'development_info',
+                        week: selectedWeek,
+                        babyName: pregnancyData.babyName
+                    });
+                    setAiDevelopmentInfo(response.content);
+                } catch (error) {
+                    console.error('Error loading AI development info:', error);
+                    setAiDevelopmentInfo('');
+                }
+            } else {
+                setAiDevelopmentInfo('');
+            }
+        };
+
+        loadAIDevelopmentInfo();
+    }, [selectedWeek, pregnancyData.currentWeek, pregnancyData.babyName, generateContent]);
+
     const getWeekData = (week: number) => {
         // Find the closest week data
         const availableWeeks = Object.keys(weeklyDevelopment).map(Number).sort((a, b) => a - b);
@@ -103,6 +131,30 @@ const WeeklyProgress: React.FC<Props> = ({ pregnancyData }) => {
                     ))}
                 </div>
             </div>
+
+            {/* Información adicional con IA (solo para semana actual) */}
+            {selectedWeek === pregnancyData.currentWeek && (
+                <div className="bg-gradient-to-r from-indigo-100 via-blue-100 to-cyan-100 p-6 rounded-2xl border border-indigo-200">
+                    <h4 className="font-semibold text-gray-800 mb-3 flex items-center">
+                        <Zap className="w-5 h-5 mr-2 text-indigo-500" />
+                        Información personalizada de esta semana
+                    </h4>
+                    {isLoadingAI ? (
+                        <div className="flex items-center space-x-2">
+                            <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce"></div>
+                            <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                            <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                            <span className="text-gray-500 text-sm">Generando información personalizada...</span>
+                        </div>
+                    ) : aiDevelopmentInfo ? (
+                        <p className="text-gray-700 text-sm leading-relaxed">{aiDevelopmentInfo}</p>
+                    ) : (
+                        <p className="text-gray-600 text-sm italic">
+                            Información adicional disponible para la semana actual
+                        </p>
+                    )}
+                </div>
+            )}
 
             {/* Indicador de semana actual */}
             {selectedWeek === pregnancyData.currentWeek && (

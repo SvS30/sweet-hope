@@ -19,3 +19,20 @@ export interface UIState {
     }>;
     theme: 'light' | 'dark';
 }
+
+export interface SEOHeadProps {
+    title?: string;
+    description?: string;
+    keywords?: string;
+    image?: string;
+    url?: string;
+}
+
+export interface BeforeInstallPromptEvent extends Event {
+    readonly platforms: string[];
+    readonly userChoice: Promise<{
+        outcome: 'accepted' | 'dismissed';
+        platform: string;
+    }>;
+    prompt(): Promise<void>;
+}

@@ -1,7 +1,9 @@
+import { useEffect, useState } from "react";
 import { Heart, MessageCircle } from "lucide-react";
+
 import { moodMessages, weeklySupport } from "../constants/messagesData";
 import type { PregnancyData } from "../types/pregnancyData"
-import { useState } from "react";
+import { useAIContent } from "../hooks";
 
 interface Props {
     pregnancyData: PregnancyData
@@ -11,6 +13,31 @@ type MoodType = 'happy' | 'tired' | 'anxious' | 'excited' | 'emotional';
 const SupportMessages: React.FC<Props> = ({ pregnancyData }) => {
 
     const [selectedMood, setSelectedMood] = useState<MoodType | null>(null);
+    const { generateContent, isLoading: isLoadingAI } = useAIContent();
+    const [aiSupportMessage, setAiSupportMessage] = useState<string>('');
+
+    useEffect(() => {
+        const loadAISupportMessage = async () => {
+            if (selectedMood) {
+                try {
+                    const response = await generateContent({
+                        type: 'support_message',
+                        week: pregnancyData.currentWeek,
+                        mood: selectedMood,
+                        babyName: pregnancyData.babyName
+                    });
+                    setAiSupportMessage(response.content);
+                } catch (error) {
+                    console.error('Error loading AI support message:', error);
+                    // Usar mensaje estático como fallback
+                    const fallbackMessage = moodMessages[selectedMood].messages[0];
+                    setAiSupportMessage(fallbackMessage);
+                }
+            }
+        };
+
+        loadAISupportMessage();
+    }, [selectedMood, pregnancyData.currentWeek, pregnancyData.babyName, generateContent]);
 
     const getWeeklyPhase = () => {
         if (pregnancyData.currentWeek <= 12) return 'early';
@@ -63,11 +90,20 @@ const SupportMessages: React.FC<Props> = ({ pregnancyData }) => {
                         <MessageCircle className="w-6 h-6 text-gray-600 mt-1 mr-3 flex-shrink-0" />
                         <div>
                             <h3 className="font-semibold text-gray-800 mb-2">
-                                Mensaje personalizado
+                                Mensaje personalizado {isLoadingAI && '✨'}
                             </h3>
-                            <p className="text-gray-700 text-sm leading-relaxed">
-                                {getRandomMessage(moodMessages[selectedMood].messages)}
-                            </p>
+                            {isLoadingAI ? (
+                                <div className="flex items-center space-x-2">
+                                    <div className="w-2 h-2 bg-pink-400 rounded-full animate-bounce"></div>
+                                    <div className="w-2 h-2 bg-pink-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                                    <div className="w-2 h-2 bg-pink-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                                    <span className="text-gray-500 text-sm">Generando mensaje personalizado...</span>
+                                </div>
+                            ) : (
+                                <p className="text-gray-700 text-sm leading-relaxed">
+                                    {aiSupportMessage || getRandomMessage(moodMessages[selectedMood].messages)}
+                                </p>
+                            )}
                         </div>
                     </div>
                 </div>

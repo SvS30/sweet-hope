@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
+import { Calendar, Clock, Gift, Heart } from "lucide-react";
+
 import { babySize } from "../constants/babyData";
 import type { PregnancyData } from "../types/pregnancyData";
-import { Calendar, Clock, Gift, Heart } from "lucide-react";
-import { supportMessages } from "../constants/messagesData";
+import { useAIContent } from "../hooks";
 
 interface Props {
     pregnancyData: PregnancyData
@@ -11,13 +12,26 @@ interface Props {
 const Dashboard: React.FC<Props> = ({ pregnancyData }) => {
 
     const [dailyMessage, setDailyMessage] = useState<string>('');
-    const [isLoadingMessage, setIsLoadingMessage] = useState<boolean>(true);
+    const { generateContent, isLoading: isLoadingMessage } = useAIContent();
+
     const currentBabySize = babySize[pregnancyData.currentWeek as keyof typeof babySize] || babySize[40];
 
     useEffect(() => {
-        setDailyMessage(supportMessages.daily_message);
-        setIsLoadingMessage(false);
-    })
+        const loadDailyMessage = async () => {
+            try {
+                const response = await generateContent({
+                    type: 'daily_message',
+                    week: pregnancyData.currentWeek,
+                    babyName: pregnancyData.babyName
+                });
+                setDailyMessage(response.content);
+            } catch (error) {
+                console.error(`Error loading daily message: ${error}`);
+                setDailyMessage('Cada día que pasa, tu cuerpo hace algo increíble: crear vida. Recuerda descansar, alimentarte bien y disfrutar cada momento de esta hermosa etapa. ¡Eres increíble! 💝');
+            }
+        };
+        loadDailyMessage();
+    }, [pregnancyData.currentWeek, pregnancyData.babyName, generateContent]);
 
     const calculateDaysLeft = () => {
         const today = new Date();

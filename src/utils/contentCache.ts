@@ -1,11 +1,6 @@
 import type { CachedContent } from "../types/serviceData";
 
-/**
- * Clase utilitaria para manejar el almacenamiento en caché de contenido relacionado con el embarazo usando localStorage.
- * Permite guardar, recuperar y limpiar datos cacheados con expiración configurable.
- */
 export class ContentCache {
-
 
     /**
      * Genera una clave única para el almacenamiento en caché.
@@ -16,7 +11,6 @@ export class ContentCache {
     private static getKey(type: string, identifier: string): string {
         return `pregnancy_${type}_${identifier}`;
     }
-
 
     /**
      * Recupera un dato del cache si no ha expirado.
@@ -41,6 +35,12 @@ export class ContentCache {
             }
         } catch (error) {
             console.warn(`Error reading from cache: ${error}`);
+            try {
+                const key = this.getKey(type, identifier);
+                localStorage.removeItem(key);
+            } catch (cleanupError) {
+                console.warn('Failed to cleanup corrupted cache entry:', cleanupError);
+            }
         }
         return null;
     }

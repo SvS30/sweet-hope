@@ -1,9 +1,11 @@
+import type { AIContentRequest } from "../types/serviceData";
+
 class SupabaseService {
 
     private supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
     private supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-    async generateAIContent(request: any): Promise<any> {
+    async generateAIContent(request: AIContentRequest): Promise<any> {
         if (!this.supabaseUrl || !this.supabaseAnonKey) {
             throw new Error(`Supabase not configured`);
         }

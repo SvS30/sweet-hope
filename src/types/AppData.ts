@@ -19,3 +19,11 @@ export interface UIState {
     }>;
     theme: 'light' | 'dark';
 }
+
+export interface SEOHeadProps {
+    title?: string;
+    description?: string;
+    keywords?: string;
+    image?: string;
+    url?: string;
+}

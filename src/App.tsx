@@ -7,6 +7,7 @@ import PregnancySetup from './components/PregnancySetup';
 import WeeklyProgress from './components/WeeklyProgress';
 import GrowthChart from './components/GrowthChart';
 import SupportMessages from './components/SupportMessages';
+import SEOHead from './components/SEOHead';
 import { setActiveTab } from './stores/slices/uiSlice';
 
 function App() {
@@ -25,6 +26,10 @@ function App() {
 	if (!isSetupComplete || !pregnancyData) {
 		return (
 			<>
+				<SEOHead
+					title="Configurar Mi Dulce Espera - Seguimiento de Embarazo"
+					description="Configura tu seguimiento personalizado de embarazo. Ingresa la fecha de tu última menstruación para comenzar."
+				/>
 				<PregnancySetup />
 			</>
 		)
@@ -32,6 +37,10 @@ function App() {
 
 	return (
 		<div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50">
+			<SEOHead
+				title={`Semana ${pregnancyData.currentWeek} - Mi Dulce Espera`}
+				description={`Seguimiento de embarazo semana ${pregnancyData.currentWeek}. Descubre cómo está creciendo tu bebé y qué cambios experimentas.`}
+			/>
 			<div className="max-w-md mx-auto bg-white shadow-2xl min-h-screen">
 				{/* Header */}
 				<div className="bg-gradient-to-r from-pink-400 via-purple-400 to-indigo-400 px-6 py-8 text-white">

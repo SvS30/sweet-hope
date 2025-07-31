@@ -1,14 +1,20 @@
-import { useState } from 'react';
 import { Heart, Baby, TrendingUp, MessageCircle, Settings } from 'lucide-react';
+
+import { useAppDispatch, useAppSelector, usePregnancy } from './hooks';
+
 import Dashboard from './components/Dashboard';
-import type { PregnancyData } from './types/pregnancyData';
+import PregnancySetup from './components/PregnancySetup';
 import WeeklyProgress from './components/WeeklyProgress';
 import GrowthChart from './components/GrowthChart';
 import SupportMessages from './components/SupportMessages';
+import { setActiveTab } from './stores/slices/uiSlice';
 
 function App() {
 
-	const [activeTab, setActiveTab] = useState('dashboard');
+	const dispatch = useAppDispatch();
+	const { pregnancyData, isSetupComplete, resetData } = usePregnancy();
+	const { activeTab } = useAppSelector((state) => state.ui);
+
 	const tabs = [
 		{ id: 'dashboard', name: 'Inicio', icon: Heart },
 		{ id: 'progress', name: 'Desarrollo', icon: Baby },
@@ -16,22 +22,12 @@ function App() {
 		{ id: 'support', name: 'Apoyo', icon: MessageCircle }
 	];
 
-	let babyData: PregnancyData = (() => {
-		const stored = localStorage.getItem('babyData');
-		try {
-			return stored ? JSON.parse(stored) : {};
-		} catch {
-			return {};
-		}
-	})();
-
-	let pregnancyData: PregnancyData = {
-		lastPeriodDate: babyData.lastPeriodDate ?? '2025/06/15',
-		dueDate: babyData.dueDate ?? '2026/03/20',
-		currentWeek: babyData.currentWeek ?? 6,
-		currentDay: babyData.currentDay || 1,
-		babyName: babyData.babyName ?? 'Amada',
-		motherName: babyData.motherName ?? 'Maria'
+	if (!isSetupComplete || !pregnancyData) {
+		return (
+			<>
+				<PregnancySetup />
+			</>
+		)
 	}
 
 	return (
@@ -47,6 +43,7 @@ function App() {
 							</p>
 						</div>
 						<button
+							onClick={resetData}
 							className="p-2 rounded-full bg-white/20 hover:bg-white/30 transition-colors"
 							aria-label="Configurar de nuevo"
 						>
@@ -72,7 +69,7 @@ function App() {
 							return (
 								<button
 									key={tab.id}
-									onClick={() => setActiveTab(tab.id)}
+									onClick={() => dispatch(setActiveTab(tab.id))}
 									className={`flex flex-col items-center px-3 py-2 rounded-xl transition-all ${isActive
 										? 'bg-gradient-to-r from-pink-100 to-purple-100 text-pink-600'
 										: 'text-gray-500 hover:text-gray-700'

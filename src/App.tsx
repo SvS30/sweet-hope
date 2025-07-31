@@ -8,6 +8,7 @@ import WeeklyProgress from './components/WeeklyProgress';
 import GrowthChart from './components/GrowthChart';
 import SupportMessages from './components/SupportMessages';
 import SEOHead from './components/SEOHead';
+import PWAPrompt from './components/PWAPrompt';
 import { setActiveTab } from './stores/slices/uiSlice';
 
 function App() {
@@ -93,8 +94,9 @@ function App() {
 					</div>
 				</div>
 			</div>
+			<PWAPrompt />
 		</div >
-	)
+	);
 }
 
 export default App
